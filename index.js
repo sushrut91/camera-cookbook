@@ -1,5 +1,8 @@
+//Dependencies
 var express = require('express');
 var mysql = require('mysql');
+const uuidGenerator = require('uuid/v4');
+
 var app = express();
 
 var bodyParser = require('body-parser');
@@ -33,6 +36,9 @@ app.get("/api/getIngredients",function(req,resp){
 });
 
 app.post('/api/saveIngredient', function(req, resp) {
+	
+	//Insert camera_ingredient object
+	var ID = uuidGenerator();
     var user_suggested_name = req.body.user_suggested_name;
 	var dominant_color = req.body.dominant_color;
 	var contour_shape = req.body.contour_shape;
@@ -45,8 +51,9 @@ app.post('/api/saveIngredient', function(req, resp) {
 	var use_frequency = req.body.use_frequency;
 	console.log(req.body.user_suggested_name);
 	
-	var insertQuery = "INSERT INTO camera_ingredients"+
-	"(user_suggested_name,dominant_color,contour_shape,shape_vertices,cusine,no_of_contours,red_value,green_value,blue_value,use_frequency) VALUES(" +
+	var cameraInsertQuery = "INSERT INTO camera_ingredients"+
+	"(ID,user_suggested_name,dominant_color,contour_shape,shape_vertices,cusine,no_of_contours,red_value,green_value,blue_value,use_frequency) VALUES(" +
+	  "'" + ID + "'," +
 	  "'" + user_suggested_name +"'," +
 	  "'" + dominant_color + "'," +
 	  "'" + contour_shape + "'," +
@@ -58,12 +65,44 @@ app.post('/api/saveIngredient', function(req, resp) {
 	 blue_value + "," +
 	 use_frequency + ");" 
 	 
+	 //Insert Google Ingredient
+	 var GID = uuidGenerator();
+	 //Foreign key
+	 var camera_ingredients_ID = ID;
+	 var google_suggested_name = req.body.google_suggested_name;
+	 var google_dominant_color = req.body.google_dominant_color;
+	 var google_red_value = req.body.google_red_value;
+	 var google_green_value = req.body.google_green_value;
+	 var google_blue_value = req.body.google_blue_value;
+	 var google_suggestions = req.body.google_suggestions;
+	 
+	 var googleInsertQuery = "INSERT INTO google_ingredients"+
+	"(ID,camera_ingredients_ID ,google_suggested_name,google_dominant_color,google_red_value,google_green_value,google_blue_value,google_suggestions) VALUES(" +
+	  "'" + GID + "'," +
+	  "'" + camera_ingredients_ID + "'," +
+	  "'" + google_suggested_name +"'," +
+	  "'" + google_dominant_color + "'," +
+	  google_red_value + "," + google_green_value + "," + google_blue_value + "," +
+	  "'" + google_suggestions + "');" 
+	 
     connection.getConnection(function(error,tempConnection){
 		if(error){
 			console.log(error);
 			tempConnection.release();
 		} else{
-			tempConnection.query(insertQuery,
+			
+			//Insert into camera ingredients
+			tempConnection.query(cameraInsertQuery,
+			function(error,rows,fields){
+				if(error){
+					console.log(error);
+				}else{
+					resp.json(rows);
+				}
+			});
+			
+			//Insert into google ingredients
+			tempConnection.query(googleInsertQuery,
 			function(error,rows,fields){
 				if(error){
 					console.log(error);
