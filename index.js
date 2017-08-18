@@ -1,13 +1,24 @@
 //Dependencies
 var express = require('express');
 var mysql = require('mysql');
+var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 const uuidGenerator = require('uuid/v4');
 
 var app = express();
 
+// get an instance of the router for api routes
+var apiRoutes = express.Router(); 
+
+//load config file
+var config = require('./config');
+//Set token from config
+
+app.set('superSecret', config.secret);
+
 var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+
 
 var connection = mysql.createPool({
 	connectionLimit:50,
@@ -16,7 +27,49 @@ var connection = mysql.createPool({
 	password:'test',
 	database:'cameracookbookapp'
 });
+// Middleware
 
+// API ROUTES -------------------
+
+// get an instance of the router for api routes
+var apiRoutes = express.Router(); 
+
+// route middleware to verify a token
+apiRoutes.use(function(req, res, next) {
+
+  // check header or url parameters or post parameters for token
+  var token = req.headers['x-access-token'];
+  // decode token
+  if (token) {
+
+    // verifies secret and checks exp
+    jwt.verify(token, app.get('superSecret'), function(err, decoded) {  
+      if (err) {
+		  console.log(err);
+        return res.json({ success: false, message: 'Failed to authenticate token.' });    
+      } else {
+        // if everything is good, save to request for use in other routes
+        req.decoded = decoded;    
+        next();
+      }
+    });
+
+  } else {
+
+    // if there is no token
+    // return an error
+    return res.status(403).send({ 
+        success: false, 
+        message: 'No token provided.' 
+    });
+
+  }
+});
+// apply the routes to our application with the prefix /api
+app.use('/api', apiRoutes);
+
+
+////////////////////////////////////////////////////
 app.get("/api/getIngredients",function(req,resp){
 	connection.getConnection(function(error,tempConnection){
 		if(error){
@@ -35,6 +88,19 @@ app.get("/api/getIngredients",function(req,resp){
 	});
 });
 
+app.post('/authenticate', function(req,resp){
+	var usr = req.body.name;
+	var token = jwt.sign(usr, app.get('superSecret'), {
+          //expiresIn: 60*60*24 
+		  });
+
+        // return the information including token as JSON
+        resp.json({
+          success: true,
+          message: 'Enjoy your token!',
+          token: token
+        });
+});
 app.post('/api/saveIngredient', function(req, resp) {
 	
 	//Insert camera_ingredient object
@@ -49,7 +115,6 @@ app.post('/api/saveIngredient', function(req, resp) {
 	var green_value = req.body.green_value;
 	var blue_value = req.body.blue_value;
 	var use_frequency = req.body.use_frequency;
-	console.log(req.body.user_suggested_name);
 	
 	var cameraInsertQuery = "INSERT INTO camera_ingredients"+
 	"(ID,user_suggested_name,dominant_color,contour_shape,shape_vertices,cusine,no_of_contours,red_value,green_value,blue_value,use_frequency) VALUES(" +
