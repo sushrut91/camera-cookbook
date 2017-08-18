@@ -97,19 +97,20 @@ app.post('/api/saveIngredient', function(req, resp) {
 				if(error){
 					console.log(error);
 				}else{
-					resp.json(rows);
+					
+						//Insert into google ingredients
+						tempConnection.query(googleInsertQuery,
+						function(error,rows,fields){
+							if(error){
+								console.log(error);
+							}else{
+								resp.json(rows);
+							}
+						});
 				}
 			});
 			
-			//Insert into google ingredients
-			tempConnection.query(googleInsertQuery,
-			function(error,rows,fields){
-				if(error){
-					console.log(error);
-				}else{
-					resp.json(rows);
-				}
-			});
+			
 		}
 	});
 });
