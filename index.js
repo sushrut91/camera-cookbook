@@ -105,11 +105,11 @@ app.post('/api/saveIngredient', function(req, resp) {
 	
 	//Insert camera_ingredient object
 	var ID = uuidGenerator();
-    var user_suggested_name = req.body.user_suggested_name;
-	var dominant_color = req.body.dominant_color;
-	var contour_shape = req.body.contour_shape;
+    var user_suggested_name = JSON.stringify(req.body.user_suggested_name);
+	var dominant_color = JSON.stringify(req.body.dominant_color);
+	var contour_shape = JSON.stringify(req.body.contour_shape);
 	var shape_vertices = req.body.shape_vertices;
-	var cusine = req.body.cusine;
+	var cusine = JSON.stringify(req.body.cusine);
 	var no_of_contours = req.body.no_of_contours;
 	var red_value = req.body.red_value;
 	var green_value = req.body.green_value;
@@ -118,12 +118,12 @@ app.post('/api/saveIngredient', function(req, resp) {
 	
 	var cameraInsertQuery = "INSERT INTO camera_ingredients"+
 	"(ID,user_suggested_name,dominant_color,contour_shape,shape_vertices,cusine,no_of_contours,red_value,green_value,blue_value,use_frequency) VALUES(" +
-	  "'" + ID + "'," +
-	  "'" + user_suggested_name +"'," +
-	  "'" + dominant_color + "'," +
-	  "'" + contour_shape + "'," +
+	  ID + "," +
+	  user_suggested_name +"," +
+	  dominant_color + "," +
+	  contour_shape + "," +
 	 shape_vertices + "," +
-	  "'" + cusine + "'," +
+	 cusine + "," +
 	 no_of_contours + "," +
 	 red_value + "," +
 	 green_value + "," +
@@ -134,21 +134,21 @@ app.post('/api/saveIngredient', function(req, resp) {
 	 var GID = uuidGenerator();
 	 //Foreign key
 	 var camera_ingredients_ID = ID;
-	 var google_suggested_name = req.body.google_suggested_name;
-	 var google_dominant_color = req.body.google_dominant_color;
+	 var google_suggested_name = JSON.stringify(req.body.google_suggested_name);
+	 var google_dominant_color = JSON.stringify(req.body.google_dominant_color);
 	 var google_red_value = req.body.google_red_value;
 	 var google_green_value = req.body.google_green_value;
 	 var google_blue_value = req.body.google_blue_value;
-	 var google_suggestions = req.body.google_suggestions;
+	 var google_suggestions = JSON.stringify(req.body.google_suggestions);
 	 
 	 var googleInsertQuery = "INSERT INTO google_ingredients"+
 	"(ID,camera_ingredients_ID ,google_suggested_name,google_dominant_color,google_red_value,google_green_value,google_blue_value,google_suggestions) VALUES(" +
 	  "'" + GID + "'," +
 	  "'" + camera_ingredients_ID + "'," +
-	  "'" + google_suggested_name +"'," +
-	  "'" + google_dominant_color + "'," +
+	  google_suggested_name +"," +
+	  google_dominant_color + "," +
 	  google_red_value + "," + google_green_value + "," + google_blue_value + "," +
-	  "'" + google_suggestions + "');" 
+	  google_suggestions + ");" 
 	 
     connection.getConnection(function(error,tempConnection){
 		if(error){
