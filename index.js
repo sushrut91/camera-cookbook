@@ -22,10 +22,10 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 var connection = mysql.createPool({
 	connectionLimit:50,
-	host:'localhost',
-	user:'testuser',
-	password:'test',
-	database:'cameracookbookapp'
+	host:'####',
+	user:'####',
+	password:'####',
+	database:'####'
 });
 // Middleware
 
@@ -104,7 +104,7 @@ app.post('/authenticate', function(req,resp){
 app.post('/api/saveIngredient', function(req, resp) {
 	
 	//Insert camera_ingredient object
-	var ID = uuidGenerator();
+	var ID = JSON.stringify(uuidGenerator());
     var user_suggested_name = JSON.stringify(req.body.user_suggested_name);
 	var dominant_color = JSON.stringify(req.body.dominant_color);
 	var contour_shape = JSON.stringify(req.body.contour_shape);
@@ -131,7 +131,7 @@ app.post('/api/saveIngredient', function(req, resp) {
 	 use_frequency + ");" 
 	 
 	 //Insert Google Ingredient
-	 var GID = uuidGenerator();
+	 var GID = JSON.stringify(uuidGenerator());
 	 //Foreign key
 	 var camera_ingredients_ID = ID;
 	 var google_suggested_name = JSON.stringify(req.body.google_suggested_name);
@@ -143,8 +143,8 @@ app.post('/api/saveIngredient', function(req, resp) {
 	 
 	 var googleInsertQuery = "INSERT INTO google_ingredients"+
 	"(ID,camera_ingredients_ID ,google_suggested_name,google_dominant_color,google_red_value,google_green_value,google_blue_value,google_suggestions) VALUES(" +
-	  "'" + GID + "'," +
-	  "'" + camera_ingredients_ID + "'," +
+	  GID +"," +
+	  camera_ingredients_ID + "," +
 	  google_suggested_name +"," +
 	  google_dominant_color + "," +
 	  google_red_value + "," + google_green_value + "," + google_blue_value + "," +
